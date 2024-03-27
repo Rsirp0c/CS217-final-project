@@ -1,0 +1,10 @@
+langchain
+langchain_openai
+openai
+huggingface_hub
+pinecone-client
+ipykernel
+pypdf
+langchain_community
+cohere
+streamlit
