@@ -6,7 +6,6 @@ import numpy as np
 from langchain_community.embeddings import CohereEmbeddings
 from langchain_community.vectorstores import Pinecone
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from langchain.llms import Ollama
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -25,9 +24,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 co = cohere.Client(os.getenv("COHERE_API_KEY"))
-
-
-pinecone = PineconeClient(api_key=os.getenv('PINECONE_API_KEY'), environment=os.getenv('PINECONE_ENVIRONMENT'))
+pinecone = PineconeClient(api_key=os.getenv('PINECONE_API_KEY'))
+environment=os.getenv('PINECONE_ENVIRONMENT')
 index = pinecone.Index(os.getenv('PINECONE_INDEX_NAME'))
 
 def get_open_ai_chat_response(query):
@@ -44,9 +42,8 @@ def get_open_ai_chat_response(query):
     prompt = ChatPromptTemplate.from_template(template)
 
     # RAG
-    # model = ChatOpenAI(temperature=t, model="gpt-3.5-turbo-1106")
     model = Ollama(
-                    model="llava",  # Provide your ollama model name here
+                    model="llava",  
                     callback_manager=CallbackManager([StreamingStdOutCallbackHandler])
                 )
 
@@ -121,9 +118,6 @@ def upSertEmbeds(processed_text):
     for i in range(0, shape[0], batch_size):
         i_end = min(i+batch_size, shape[0])
         index.upsert(vectors=to_upsert[i:i_end])
-
-    # let's view the index statistics
-    print(index.describe_index_stats())
 
 
 def main():

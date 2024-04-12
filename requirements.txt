@@ -8,3 +8,4 @@ pypdf
 langchain_community
 cohere
 streamlit
+python-dotenv
