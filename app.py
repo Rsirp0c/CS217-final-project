@@ -18,6 +18,9 @@ import tempfile
 from langchain_community.vectorstores import Pinecone
 from pinecone import Pinecone as PineconeClient
 
+# import the storing of static information in a separate file
+from src.constant import *
+
 # # Load environment variables
 from dotenv import load_dotenv
 
@@ -27,6 +30,46 @@ co = cohere.Client(os.getenv("COHERE_API_KEY"))
 pinecone = PineconeClient(api_key=os.getenv('PINECONE_API_KEY'))
 environment=os.getenv('PINECONE_ENVIRONMENT')
 index = pinecone.Index(os.getenv('PINECONE_INDEX_NAME'))
+
+def dev_or_prod():
+    '''
+    This function is used to toggle between development and production environments.
+
+    - session_state is used to store the environment status and api keys throughout a session.
+      https://docs.streamlit.io/develop/api-reference/caching-and-state/st.session_state
+    - secrets are used to store sensitive information such as API keys that are not exposed to the user.
+      https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management
+    '''
+
+    if 'environment_status' not in st.session_state:
+        st.session_state.environment_status = None
+    if 'api_keys' not in st.session_state:
+        st.session_state.api_keys = {
+            'pinecone_api_key': '',
+            'cohere_api_key': '',
+            'pinecone_index_name': '',
+            'pinecone_environment': ''
+        }
+
+    with st.sidebar:
+        on = st.toggle('Development Environment', False)
+        if on:
+            st.session_state.environment_status = 'dev'
+        else:
+            st.session_state.environment_status = 'prod'
+
+        if st.session_state.environment_status == 'dev':
+            st.session_state.api_keys['pinecone_api_key'] = st.secrets["PINECONE_API_KEY"]
+            st.session_state.api_keys['cohere_api_key'] = st.secrets["COHERE_API_KEY"]
+            st.session_state.api_keys['pinecone_index_name'] = st.secrets['PINECONE_INDEX_NAME']
+            st.session_state.api_keys['pinecone_environment'] = st.secrets['PINECONE_ENVIRONMENT']
+            progress_spin()
+            st.success('Development environment is on', icon="✅")
+        else:
+            st.session_state.api_keys['pinecone_api_key'] = st.sidebar.text_input('Pinecone API Key', type="password")
+            st.session_state.api_keys['cohere_api_key'] = st.sidebar.text_input('Cohere API Key', type="password")
+            st.session_state.api_keys['pinecone_index_name'] = st.sidebar.text_input('Pinecone Index Name',type="password" )
+            st.session_state.api_keys['pinecone_environment'] = st.sidebar.text_input('Pinecone Environment', type="password")
 
 def get_open_ai_chat_response(query):
     embeddings = CohereEmbeddings(model="embed-english-v3.0")
@@ -121,14 +164,14 @@ def upSertEmbeds(processed_text):
 
 
 def main():
-    st.set_page_config(
-        page_title="RAG Chatbot App")
-    st.header(
-        "Brandeis University - NLP Course App")
+    st.set_page_config(page_title="RAG Chatbot App", page_icon=":sunglasses:")
+    st.header("COSI217 final project: :blue[RAG]")
 
-    st.sidebar.title("About the App")
-    st.sidebar.info(
-        """The app is a simple demonstration of a QA Chatbot using the RAG model.""")
+    st.sidebar.title("App Settings")
+    dev_or_prod()
+    st.sidebar.info("""The app is a simple demonstration of a QA Chatbot using the RAG model.""")
+    
+
     input = st.text_input(
         "Ask a question", key="input")
     

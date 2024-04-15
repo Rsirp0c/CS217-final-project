@@ -2,6 +2,8 @@
 venv
 .env
 
-
 # files
 *.pdf
+.DS_Store
+__pycache__
+.streamlit/secrets.toml
