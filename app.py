@@ -3,7 +3,11 @@ import streamlit as st
 import os
 import re
 import numpy as np
-from openai import OpenAI
+# from openai import OpenAI
+from langchain.llms import openai
+from langchain_cohere import Cohere
+from langchain_core.messages import HumanMessage
+from langchain_community.llms.llamafile import Llamafile
 import tempfile
 
 import cohere
@@ -87,7 +91,7 @@ with respond:
     recall_number = st.number_input('###### Choose the number of recall',value=3, step=1)
 
     model = st.radio('###### Select the LLM model 👇', 
-                         ['model 1', 'model 2', 'model 3'], 
+                         ['OpenAI', 'Cohere', 'TinyLlama'], 
                          help='Choose different LLM models to generate responses')
 
 "---"
@@ -95,10 +99,18 @@ with respond:
 
 st.write("### Chat here 👋")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+if model == "OpenAI" and st.session_state.api_keys['openai_api_key']:
+    client = openai(api_key=st.session_state.api_keys['openai_api_key'])
+elif model == "Cohere" and st.session_state.api_keys['cohere_api_key']:
+    client = Cohere(
+            cohere_api_key=st.session_state.api_keys['cohere_api_key']
+        )
+elif model == "TinylLlama":
+    client = Llamafile()
+else:
+    st.error("Invalid Api Key")
 
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -113,15 +125,16 @@ if prompt := st.chat_input("What is up?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        stream = client.chat.completions.create(
-            model=st.session_state["openai_model"],
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
-        response = st.write_stream(stream)
+        # stream = client.chat.completions.create(
+        #     model=st.session_state["openai_model"],
+        #     messages=[
+        #         {"role": m["role"], "content": m["content"]}
+        #         for m in st.session_state.messages
+        #     ],
+        #     stream=True,
+        # )
+        response = client.invoke(prompt)
+        st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
 
 # input = st.text_input(
