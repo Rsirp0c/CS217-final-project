@@ -116,8 +116,7 @@ elif model == "Cohere" and st.session_state.api_keys['cohere_api_key']:
         st.error("No Cohere Api key")
 elif model == "TinylLlama":
     client = Llamafile()
-else:
-    st.error("Invalid Api Key")
+
 
 
 
@@ -135,7 +134,10 @@ if prompt := st.chat_input("What is up?"):
     prompt = message = [HumanMessage(content=prompt)]
 
     with st.chat_message("assistant"):
-        response = client.invoke(prompt).content
+        if uploaded_file: 
+            response = client.invoke(prompt).content
+        else:
+            response = "Please upload a file to get started. Chat soon!😝"
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
 
