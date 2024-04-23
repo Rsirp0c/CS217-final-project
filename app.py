@@ -103,11 +103,17 @@ with respond:
 st.write("### Chat here 👋")
 
 if model == "OpenAI" and st.session_state.api_keys['openai_api_key']:
-    client = OpenAI(api_key=st.session_state.api_keys['openai_api_key'])
+    if st.session_state.api_keys['openai_api_key']:
+        client = OpenAI(api_key=st.session_state.api_keys['openai_api_key'])
+    else:
+        st.error("No OpenAI Api key")
 elif model == "Cohere" and st.session_state.api_keys['cohere_api_key']:
-    client = ChatCohere(
-            cohere_api_key=st.session_state.api_keys['cohere_api_key']
-        )
+    if st.session_state.api_keys['cohere_api_key']:
+        client = ChatCohere(
+                cohere_api_key=st.session_state.api_keys['cohere_api_key']
+            )
+    else:
+        st.error("No Cohere Api key")
 elif model == "TinylLlama":
     client = Llamafile()
 else:
