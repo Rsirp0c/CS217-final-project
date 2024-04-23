@@ -21,4 +21,3 @@
 - Xiaoran Liu
 - Zhenxu Chen
 - Haochen Lin
-- 
