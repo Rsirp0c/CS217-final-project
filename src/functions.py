@@ -15,6 +15,11 @@ import os
 import re
 import numpy as np
 
+dim2embed = { # mapping of dimensions to embeddings
+                8: 'model1',
+                8: 'model2',
+                8: 'model3',}
+
 
 def get_open_ai_chat_response(query):
     embeddings = CohereEmbeddings(model="embed-english-v3.0")

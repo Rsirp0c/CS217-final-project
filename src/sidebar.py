@@ -7,7 +7,7 @@ def add_dataset():
         name = st.text_input('Dataset Name',placeholder='name of dataset')
         description = st.text_input('Description', placeholder='Description of dataset')
         model = st.selectbox('Select Embedding model', ['model 1', 'model 2', 'model 3'], help='Different embedding models vectorize text differently')
-        metrics = st.selectbox('Select Metrics', ['cosine', 'euclidean', 'dot product'], help='Metrics are used to calculate the similarity between vectors')
+        metrics = st.selectbox('Select Metrics', ['cosine', 'euclidean', 'dotproduct'], help='Metrics are used to calculate the similarity between vectors')
         New_dataset = st.form_submit_button('Create New Dataset')
         if New_dataset:
             st.session_state.datasets[name] = [description, model, metrics]
@@ -15,14 +15,13 @@ def add_dataset():
             index_name = name
             pc.create_index(
                 name=index_name,
-                dimension=8,
-                metric="cosine",
+                dimension=8,        ### need to change 
+                metric=metrics,
                 spec=ServerlessSpec(
                     cloud='aws', 
                     region='us-east-1'
                 ) 
             ) 
-            index = pc.Index(index_name)
             st.rerun()
             
 
@@ -31,12 +30,15 @@ def add_keys():
     with st.form('API Keys', clear_on_submit=True):
         pinecone_api_key = st.text_input('Pinecone API Key', type="password")
         cohere_api_key = st.text_input('Cohere API Key (optional)', type="password")
+        openai_api_key = st.text_input('OpenAI API Key (optional)', type="password")
         # pinecone_index_name = st.text_input('Pinecone Index Name',type="password" )
         # pinecone_environment = st.text_input('Pinecone Environment', type="password")
         New_keys = st.form_submit_button('Add API Keys')
         if New_keys:
             st.session_state.api_keys['pinecone_api_key'] = pinecone_api_key
             st.session_state.api_keys['cohere_api_key'] = cohere_api_key
+            st.session_state.api_keys['openai_api_key'] = openai_api_key
+            st.rerun()
             # st.session_state.api_keys['pinecone_index_name'] = pinecone_index_name
             # st.session_state.api_keys['pinecone_environment'] = pinecone_environment
 
@@ -57,6 +59,7 @@ def init_dev_or_prod():
         st.session_state.api_keys = {
             'pinecone_api_key': None,
             'cohere_api_key': None,
+            'openai_api_key': None,
             # 'pinecone_index_name': None,
             # 'pinecone_environment': None
         }
@@ -78,12 +81,13 @@ def init_dev_or_prod():
         if st.session_state.environment_status == 'dev':
             st.session_state.api_keys['pinecone_api_key'] = st.secrets["PINECONE_API_KEY"]
             st.session_state.api_keys['cohere_api_key'] = st.secrets["COHERE_API_KEY"]
+            st.session_state.api_keys['openai_api_key'] = st.secrets["OPENAI_API_KEY"]
             # st.session_state.api_keys['pinecone_index_name'] = st.secrets['PINECONE_INDEX_NAME']
             # st.session_state.api_keys['pinecone_environment'] = st.secrets['PINECONE_ENVIRONMENT']
             # progress_spin()
             st.success('Development environment is on', icon="✅")
         else:
-            if st.session_state.api_keys['pinecone_api_key'] and st.session_state.api_keys['cohere_api_key']:
+            if st.session_state.api_keys['pinecone_api_key']:
                 with st.expander("edit API keys"):
                     add_keys()
             else:
@@ -98,6 +102,11 @@ def sidebar_func():
         st.sidebar.warning('Please add Pinecone API Key')
 
     else:
+        pinecone = Pinecone(api_key=st.session_state.api_keys['pinecone_api_key'])
+        indexes = pinecone.list_indexes()
+        if indexes:
+            for index in indexes:
+                st.session_state.datasets[index['name']] = ['', index['dimension'], index['metric']]
         dataset = st.sidebar.selectbox("Select a dataset", st.session_state.datasets,index=0)
         if dataset:
             st.session_state.current_dataset = dataset
@@ -108,3 +117,4 @@ def sidebar_func():
             else:
                 with st.expander("Add New Dataset"):
                     add_dataset() 
+                

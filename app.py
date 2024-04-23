@@ -22,23 +22,26 @@ sidebar_func()
 
 if st.session_state.api_keys['pinecone_api_key']:
     pinecone = PineconeClient(api_key=st.session_state.api_keys['pinecone_api_key'])
-    
+        
 if  st.session_state.api_keys['cohere_api_key']:
     co = cohere.Client(st.session_state.api_keys['cohere_api_key'])
 
 if st.session_state.current_dataset:
-    index = st.session_state.current_dataset[1]
+    index = pinecone.Index(st.session_state.current_dataset)
 
-    # conn = st.connection(
-    #     "pinecone", 
-    #     type=PineconeConnection, 
-    #     api_key = st.session_state.api_keys['pinecone_api_key'],
-    #     environment = st.session_state.api_keys['pinecone_environment'], 
-    #     index_name = st.session_state.api_keys['pinecone_index_name']
-    # )
-
-    # st.sidebar.success('Connected to :blue[Pinecone] and :blue[Cohere]')
-st.sidebar.info("The app is a simple demonstration of a QA Chatbot using the RAG model.")
+with st.sidebar:
+    if st.button('Delete Current Dataset'):
+        pinecone.delete_index(st.session_state.current_dataset)
+        st.session_state.datasets.pop(st.session_state.current_dataset)
+        st.session_state.current_dataset = None
+        st.rerun()
+    if st. button('Delete All Datasets'):
+        for index in st.session_state.datasets:
+            pinecone.delete_index(index)
+        st.session_state.datasets = {}
+        st.session_state.current_dataset = None
+        st.rerun()
+    st.info("The app is a simple demonstration of a QA Chatbot using the RAG model.")
 
 # ----------------- Headers -----------------
 
@@ -52,14 +55,14 @@ with upload:
     "#### :blue[Uploading] & :blue[Chunking]"
 
     if st.session_state.current_dataset:
-        embed = st.session_state.datasets[st.session_state.current_dataset][1]
+        dimensions = st.session_state.datasets[st.session_state.current_dataset][1]
+        embed = dim2embed[dimensions]
         st.write("**Current Embedding model is: ", '`'+embed+'`**') 
     
     chunk = st.radio( "###### Choose chunking strategy 👇",
                     options = ["chunk1", "chunk2", "chunk3"],
                     # captions=["Chunk 1", "Chunk 2", "Chunk 3"]
                     )
-
 
     uploaded_file = st.file_uploader("Upload file", type="pdf")
 
@@ -87,7 +90,7 @@ with respond:
                          ['model 1', 'model 2', 'model 3'], 
                          help='Choose different LLM models to generate responses')
 
-
+"---"
 # ----------------- Chat -----------------
 
 st.write("### Chat here 👋")
