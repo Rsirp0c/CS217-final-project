@@ -21,7 +21,7 @@ dim2embed = { # mapping of dimensions to embeddings
                 8: 'model3',}
 
 
-def get_open_ai_chat_response(query):
+def get_response(query, model):
     embeddings = CohereEmbeddings(model="embed-english-v3.0")
     vectorstore = Pinecone.from_existing_index(
         index_name=os.getenv('PINECONE_INDEX_NAME'), embedding=embeddings)
@@ -36,11 +36,6 @@ def get_open_ai_chat_response(query):
     prompt = ChatPromptTemplate.from_template(template)
 
     # RAG
-    model = Ollama(
-                    model="llava",  
-                    callback_manager=CallbackManager([StreamingStdOutCallbackHandler])
-                )
-
     chain = (
         RunnableParallel(
             {"context": retriever, "question": RunnablePassthrough()})
