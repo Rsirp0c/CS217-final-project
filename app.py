@@ -4,8 +4,8 @@ import os
 import re
 import numpy as np
 # from openai import OpenAI
-from langchain.llms import openai
-from langchain_cohere import Cohere
+from langchain_openai import OpenAI
+from langchain_cohere import ChatCohere
 from langchain_core.messages import HumanMessage
 from langchain_community.llms.llamafile import Llamafile
 import tempfile
@@ -93,6 +93,9 @@ with respond:
     model = st.radio('###### Select the LLM model 👇', 
                          ['OpenAI', 'Cohere', 'TinyLlama'], 
                          help='Choose different LLM models to generate responses')
+    if model == 'TinyLlama':
+        st.warning('Follow the insturction [here](https://python.langchain.com/docs/integrations/llms/llamafile/) and download the TinyLlama model before use!', icon="⚠️")
+
 
 "---"
 # ----------------- Chat -----------------
@@ -100,9 +103,9 @@ with respond:
 st.write("### Chat here 👋")
 
 if model == "OpenAI" and st.session_state.api_keys['openai_api_key']:
-    client = openai(api_key=st.session_state.api_keys['openai_api_key'])
+    client = OpenAI(api_key=st.session_state.api_keys['openai_api_key'])
 elif model == "Cohere" and st.session_state.api_keys['cohere_api_key']:
-    client = Cohere(
+    client = ChatCohere(
             cohere_api_key=st.session_state.api_keys['cohere_api_key']
         )
 elif model == "TinylLlama":
@@ -123,9 +126,10 @@ if prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
+    prompt = message = [HumanMessage(content=prompt)]
 
     with st.chat_message("assistant"):
-        response = get_response(prompt, client)
+        response = client.invoke(prompt).content
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
 
