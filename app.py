@@ -117,9 +117,6 @@ elif model == "Cohere" and st.session_state.api_keys['cohere_api_key']:
 elif model == "TinylLlama":
     client = Llamafile()
 
-
-
-
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -134,22 +131,13 @@ if prompt := st.chat_input("What is up?"):
     prompt = message = [HumanMessage(content=prompt)]
 
     with st.chat_message("assistant"):
-        if uploaded_file: 
-            response = client.invoke(prompt).content
+        if uploaded_file or st.session_state.current_dataset: 
+            # response = client.invoke(prompt).content
+            response = get_response(prompt, client, recall_number)
         else:
             response = "Please upload a file to get started. Chat soon!😝"
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
-
-# input = st.text_input(
-#     "Ask a question", key="input")
-
-# submit = st.button("Ask")
-
-# if submit:
-#     response = get_open_ai_chat_response(input)
-#     st.subheader("The Response is:")
-#     st.write(response)
 
 with st.sidebar:
     if st.session_state.environment_status == 'dev':

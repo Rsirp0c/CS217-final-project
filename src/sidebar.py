@@ -1,12 +1,12 @@
 import streamlit as st
 from pinecone import Pinecone, ServerlessSpec
-
+from src.functions import embed2dim
 
 def add_dataset():
     with st.form('New Dataset', clear_on_submit=True):
         name = st.text_input('Dataset Name',placeholder='name of dataset')
         description = st.text_input('Description', placeholder='Description of dataset')
-        model = st.selectbox('Select Embedding model', ['model 1', 'model 2', 'model 3'], help='Different embedding models vectorize text differently')
+        model = st.selectbox('Select Embedding model', ['snowflake-arctic-embed-m', 'all-MiniLM-L6-v2', 'Cohere-embed-english-v3.0'], help='Different embedding models vectorize text differently')
         metrics = st.selectbox('Select Metrics', ['cosine', 'euclidean', 'dotproduct'], help='Metrics are used to calculate the similarity between vectors')
         New_dataset = st.form_submit_button('Create New Dataset')
         if New_dataset:
@@ -15,7 +15,7 @@ def add_dataset():
             index_name = name
             pc.create_index(
                 name=index_name,
-                dimension=8,        ### need to change 
+                dimension=embed2dim[model],        ### need to change 
                 metric=metrics,
                 spec=ServerlessSpec(
                     cloud='aws', 

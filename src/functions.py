@@ -9,22 +9,26 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.document_loaders import PyPDFLoader
 import unicodedata
 from langchain_community.vectorstores import Pinecone
-from streamlit_pinecone import PineconeConnection
+# from streamlit_pinecone import PineconeConnection
 import streamlit as st
 import os
 import re
 import numpy as np
 
-dim2embed = { # mapping of dimensions to embeddings
-                8: 'model1',
-                8: 'model2',
-                8: 'model3',}
+embed2dim = { # embeddings to dimensions
+                'Cohere-embed-english-v3.0': 1024,
+                'all-MiniLM-L6-v2': 384,
+                'snowflake-arctic-embed-m': 768}
 
+dim2embed = { # dimensions to embeddings
+                1024: 'Cohere-embed-english-v3.0',
+                384: 'all-MiniLM-L6-v2',
+                768: 'snowflake-arctic-embed-m'}
 
-def get_response(query, model):
+def get_response(query, model, recall):
     embeddings = CohereEmbeddings(model="embed-english-v3.0")
     vectorstore = Pinecone.from_existing_index(
-        index_name=os.getenv('PINECONE_INDEX_NAME'), embedding=embeddings)
+        index_name=st.session_state.current_dataset, embedding=embeddings)
     
     retriever = vectorstore.as_retriever()
 
