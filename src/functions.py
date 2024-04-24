@@ -1,12 +1,11 @@
 from langchain_community.embeddings import CohereEmbeddings
 from langchain_community.vectorstores import Pinecone
 from langchain_core.prompts import ChatPromptTemplate
-from langchain.llms import Ollama
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.callbacks.manager import CallbackManager
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 import unicodedata
 from langchain_community.vectorstores import Pinecone
 # from streamlit_pinecone import PineconeConnection
@@ -30,7 +29,7 @@ def get_response(query, model, recall):
     vectorstore = Pinecone.from_existing_index(
         index_name=st.session_state.current_dataset, embedding=embeddings)
     
-    retriever = vectorstore.as_retriever()
+    retriever = vectorstore.as_retriever(search_kwargs={"k": recall})
 
     # RAG prompt
     template = """Answer the question based only on the following context:

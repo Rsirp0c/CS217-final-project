@@ -6,7 +6,6 @@ import numpy as np
 # from openai import OpenAI
 from langchain_openai import OpenAI
 from langchain_cohere import ChatCohere
-from langchain_core.messages import HumanMessage
 from langchain_community.llms.llamafile import Llamafile
 import tempfile
 
@@ -88,7 +87,7 @@ with upload:
 with respond:
     "#### :blue[Calling] & :blue[Responding]"
     
-    recall_number = st.number_input('###### Choose the number of recall',value=3, step=1)
+    recall_number = st.number_input('###### Choose the number of retrieval',value=3, step=1)
 
     model = st.radio('###### Select the LLM model 👇', 
                          ['OpenAI', 'Cohere', 'TinyLlama'], 
@@ -128,7 +127,8 @@ if prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-    prompt = message = [HumanMessage(content=prompt)]
+    # prompt = HumanMessage(content=prompt)
+    # print(prompt)
 
     with st.chat_message("assistant"):
         if uploaded_file or st.session_state.current_dataset: 
