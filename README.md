@@ -21,3 +21,8 @@
 - Xiaoran Liu
 - Zhenxu Chen
 - Haochen Lin
+
+## Screenshots:
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot1.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot2.png">
+
