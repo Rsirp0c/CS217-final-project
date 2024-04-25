@@ -3,6 +3,9 @@ from pinecone import Pinecone, ServerlessSpec
 from src.functions import embed2dim
 
 def add_dataset():
+    '''
+    This function is used to add a new dataset to the Pinecone index.
+    '''
     with st.form('New Dataset', clear_on_submit=True):
         name = st.text_input('Dataset Name',placeholder='name of dataset')
         description = st.text_input('Description', placeholder='Description of dataset')
@@ -27,6 +30,9 @@ def add_dataset():
 
 
 def add_keys():
+    '''
+    This function is used to add API keys to the session state.
+    '''
     with st.form('API Keys', clear_on_submit=True):
         pinecone_api_key = st.text_input('Pinecone API Key', type="password")
         cohere_api_key = st.text_input('Cohere API Key (optional)', type="password")

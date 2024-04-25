@@ -64,14 +64,6 @@ def get_response(query, model, top_k_val):
     @param recall: an int. The number of documents to retrieve.
     @return: a string. The response from the model.
     '''
-    # curr_embedding_dimension = st.session_state.datasets[st.session_state.current_dataset][1]
-    # if curr_embedding_dimension == 1024:
-    #     embedding_model = cohere.Client(st.session_state.api_keys['cohere_api_key'])
-    # elif curr_embedding_dimension == 384:
-    #     embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-    # elif curr_embedding_dimension == 768:
-    #     embedding_model = SentenceTransformer("Snowflake/snowflake-arctic-embed-m", trust_remote_code=True)
-    
     query_vector = embed([query]).tolist()
     pc = PineconeClient(api_key=st.session_state.api_keys['pinecone_api_key'])
     index = pc.Index(st.session_state.current_dataset)
@@ -114,13 +106,6 @@ def get_response1(query, model, top_k_val):
     @param recall: an int. The number of documents to retrieve.
     @return: a string. The response from the model.
     '''
-    # curr_embedding_dimension = st.session_state.datasets[st.session_state.current_dataset][1]
-    # if curr_embedding_dimension == 1024:
-    #     embedding_model = cohere.Client(st.session_state.api_keys['cohere_api_key'])
-    # elif curr_embedding_dimension == 384:
-    #     embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-    # elif curr_embedding_dimension == 768:
-    #     embedding_model = SentenceTransformer("Snowflake/snowflake-arctic-embed-m", trust_remote_code=True)
     query_vector = embed([query])
     if type(query_vector) != list:
         query_vector = embed([query]).tolist()
@@ -134,18 +119,18 @@ def get_response1(query, model, top_k_val):
                         include_metadata = True
                     )
     
-    retrieved_chunks = [match['metadata'].get('text', 'Default text') for match in top_k_chunks['matches']]
+    text_chunks = [match['metadata'].get('text', 'Default text') for match in top_k_chunks['matches']]
 
     # RAG prompt
     prompt =  f"""
                 Answer the question based only on the following context:
-                {retrieved_chunks}
+                {text_chunks}
                 Question: {query}
                 """
     
     response = model.invoke(prompt).content
 
-    return response
+    return response, top_k_chunks
 
 # Reading pdfs
 def read_pdf(file_path):

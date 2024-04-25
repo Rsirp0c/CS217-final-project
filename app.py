@@ -3,6 +3,7 @@ import streamlit as st
 import os
 import re
 import numpy as np
+import pandas as pd
 # from openai import OpenAI
 from langchain_openai import OpenAI
 from langchain_cohere import ChatCohere
@@ -64,6 +65,7 @@ with upload:
     
     chunk = st.radio( "###### Choose chunking strategy 👇",
                     options = ["chunk1", "chunk2", "chunk3"],
+                    help="Choose different chunking strategies to split the document into smaller parts"
                     # captions=["Chunk 1", "Chunk 2", "Chunk 3"]
                     )
 
@@ -81,10 +83,19 @@ with upload:
 
 # ----------------- Respond setting -----------------
 
+if 'top_k_chunks' not in st.session_state:
+    st.session_state.top_k_chunks = None
+
 with respond:
     "#### :blue[Calling] & :blue[Responding]"
-    
-    recall_number = st.number_input('###### Choose the number of retrieval',value=3, step=1)
+    if st.session_state.current_dataset:
+        metric = st.session_state.datasets[st.session_state.current_dataset][2]
+        st.write("**Current distence metric is: ", '`'+metric+'`**') 
+    if st.session_state.current_dataset:
+        max_k = index.describe_index_stats()['namespaces']['']['vector_count']
+    else:
+        max_k = 5
+    recall_number = st.number_input('###### Choose the number of retrieval',value=3, step=1, min_value=1, max_value=max_k)
 
     model = st.radio('###### Select the LLM model 👇', 
                          ['OpenAI', 'Cohere', 'TinyLlama'], 
@@ -92,6 +103,26 @@ with respond:
     if model == 'TinyLlama':
         st.warning('Follow the insturction [here](https://python.langchain.com/docs/integrations/llms/llamafile/) and download the TinyLlama model before use!', icon="⚠️")
 
+if st.session_state.top_k_chunks:
+    df = pd.DataFrame(
+        {
+        'id': [match['id'] for match in st.session_state.top_k_chunks['matches']],
+        'score': [match['score'] for match in st.session_state.top_k_chunks['matches']],
+        'text': [' '.join(match['metadata']['text'].split()[:10])+'...' for match in st.session_state.top_k_chunks['matches']]
+        }
+    )
+    st.data_editor(
+    df,
+    column_config={
+        "score": st.column_config.ProgressColumn(
+            "similarity score",
+            help="The similarity score between the query and the document.",
+            min_value=0,
+            max_value=1,
+        ),
+    },
+    hide_index=True,
+)
 
 "---"
 # ----------------- Chat -----------------
@@ -129,12 +160,34 @@ if prompt := st.chat_input("What is up?"):
 
     with st.chat_message("assistant"):
         if uploaded_file or st.session_state.current_dataset: 
-            response = get_response1(prompt, client, recall_number)
+            response, top_k_chunks = get_response1(prompt, client, recall_number)
+            print(top_k_chunks)
             # response = client.invoke(prompt).content
             # response = get_response(prompt, client, recall_number)
         else:
             response = "Please upload a file to get started. Chat soon!😝"
         st.markdown(response)
+        if top_k_chunks:
+                df = pd.DataFrame(
+                    {
+                    'id': [match['id'] for match in top_k_chunks['matches']],
+                    'score': [match['score'] for match in top_k_chunks['matches']],
+                    'text': [' '.join(match['metadata']['text'].split()[:13])+'...' for match in top_k_chunks['matches']]
+                    }
+                )
+                st.data_editor(
+                df,
+                column_config={
+                    "score": st.column_config.ProgressColumn(
+                        "similarity score",
+                        help="The similarity score between the query and the document.",
+                        min_value=0,
+                        max_value=1,
+                    ),
+                },
+                hide_index=True,
+            )
+        
     st.session_state.messages.append({"role": "assistant", "content": response})
 
 with st.sidebar:
