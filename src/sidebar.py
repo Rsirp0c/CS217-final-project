@@ -10,7 +10,7 @@ def add_dataset():
         metrics = st.selectbox('Select Metrics', ['cosine', 'euclidean', 'dotproduct'], help='Metrics are used to calculate the similarity between vectors')
         New_dataset = st.form_submit_button('Create New Dataset')
         if New_dataset:
-            st.session_state.datasets[name] = [description, model, metrics]
+            st.session_state.datasets[name] = [description]
             pc = Pinecone(api_key=st.session_state.api_keys['pinecone_api_key'])
             index_name = name
             pc.create_index(
@@ -106,7 +106,10 @@ def sidebar_func():
         indexes = pinecone.list_indexes()
         if indexes:
             for index in indexes:
-                st.session_state.datasets[index['name']] = ['', index['dimension'], index['metric']]
+                if index['name'] not in st.session_state.datasets:
+                    st.session_state.datasets[index['name']] = ['', index['dimension'], index['metric']]
+                else:
+                    st.session_state.datasets[index['name']] = [st.session_state.datasets[index['name']][0], index['dimension'], index['metric']]
         dataset = st.sidebar.selectbox("Select a dataset", st.session_state.datasets,index=0)
         if dataset:
             st.session_state.current_dataset = dataset

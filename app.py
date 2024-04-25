@@ -51,7 +51,7 @@ with st.sidebar:
 st.header("COSI217 final project: :blue[RAG]")
 st.write("### Current dataset is: ", '`'+str(st.session_state.current_dataset)+'`')
 
-upload,_, respond = st.columns([1, 0.1, 1])
+upload, _, respond = st.columns([1, 0.1, 1])
 
 # ----------------- File Upload -----------------
 with upload:
@@ -76,11 +76,8 @@ with upload:
                 f.write(uploaded_file.getvalue())
         documents = read_pdf(path)
         processed_text = process_documents(documents)
-        # # Display processed text
-        # st.subheader("Processed Text:")
-        # st.write(processed_text)
-        text_to_embed = [processed_text]
-        upSertEmbeds(text_to_embed, co, index, chunk)
+        processed_text = chunking(processed_text)
+        upSertEmbeds(processed_text, index)
 
 # ----------------- Respond setting -----------------
 
@@ -132,8 +129,9 @@ if prompt := st.chat_input("What is up?"):
 
     with st.chat_message("assistant"):
         if uploaded_file or st.session_state.current_dataset: 
+            response = get_response1(prompt, client, recall_number)
             # response = client.invoke(prompt).content
-            response = get_response(prompt, client, recall_number)
+            # response = get_response(prompt, client, recall_number)
         else:
             response = "Please upload a file to get started. Chat soon!😝"
         st.markdown(response)
