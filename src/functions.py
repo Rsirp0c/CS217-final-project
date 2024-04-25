@@ -6,6 +6,11 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_community.document_loaders import PyPDFLoader
 import unicodedata
 
+# import splitters library
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import NLTKTextSplitter
+
+
 import streamlit as st
 import cohere
 from pinecone import Pinecone as PineconeClient
@@ -139,8 +144,8 @@ def read_pdf(file_path):
     return documents
 
 
-# Process pdfs
-def process_documents(documents):
+# Process pdfs and return text
+def process_documents_chunk1(documents):
     '''
     @param documents: List of documents.
     @return: a long sting. Concatenated text from document.
@@ -162,7 +167,51 @@ def process_documents(documents):
 
     return doc_text
 
-def chunking(text):
+# Process pdfs and return text
+def process_documents_chunk2(documents):
+    '''
+    @param documents: List of documents.
+    @return: a long sting. Concatenated text from document.
+    '''
+    doc_text = ''
+    for doc in documents:
+
+        text = doc.page_content
+        # Remove unknown characters
+        text = ''.join(c for c in text if unicodedata.category(c) != 'Co')
+        # Remove extra whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+        # Remove non-alphanumeric characters
+        text = re.sub(r'[^a-zA-Z0-9\s.,]', '', text)
+        # Convert to lowercase
+        text = text.lower()
+        doc_text += text
+
+    return doc_text
+
+# Process pdfs and return text
+def process_documents_chunk3(documents):
+    '''
+    @param documents: List of documents.
+    @return: a long sting. Concatenated text from document.
+    '''
+    doc_text = ''
+    for doc in documents:
+
+        text = doc.page_content
+        # Remove unknown characters
+        text = ''.join(c for c in text if unicodedata.category(c) != 'Co')
+        # Remove extra whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+        # Remove non-alphanumeric characters
+        text = re.sub(r'[^a-zA-Z0-9\s.,]', '', text)
+        # Convert to lowercase
+        text = text.lower()
+        doc_text += text
+
+    return doc_text
+
+def chunking1(text):
     '''
     @param text: a long string
     @return: a list of strings. Each string is a chunk of the text.
@@ -170,3 +219,27 @@ def chunking(text):
     chunk_size = len(text) // 10
     chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
     return chunks
+
+def chunking2(text):
+    '''
+    @param text: a long string
+    @return: a list of strings. Each string is a chunk of the text.
+    '''
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=100,
+        chunk_overlap=20,
+        length_function=len,
+        is_separator_regex=False,
+    )
+    texts = text_splitter.split_text(text)
+    return texts
+    
+def chunking3(text):
+    '''
+    @param text: a long string
+    @return: a list of strings. Each string is a chunk of the text.
+    '''
+    text_splitter = NLTKTextSplitter(chunk_size=1000)
+    texts = text_splitter.split_text(text)
+    return texts
+

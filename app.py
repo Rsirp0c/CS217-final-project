@@ -77,8 +77,15 @@ with upload:
         with open(path, "wb") as f:
                 f.write(uploaded_file.getvalue())
         documents = read_pdf(path)
-        processed_text = process_documents(documents)
-        processed_text = chunking(processed_text)
+        if chunk == "chunk1":
+            processed_text = process_documents_chunk1(documents)
+            processed_text = chunking1(processed_text)
+        elif chunk == "chunk2":
+            processed_text = process_documents_chunk2(documents)
+            processed_text = chunking2(processed_text)
+        elif chunk == "chunk3":
+            processed_text = process_documents_chunk3(documents)
+            processed_text = chunking3(processed_text)
         upSertEmbeds(processed_text, index)
 
 # ----------------- Respond setting -----------------
