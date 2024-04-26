@@ -1,6 +1,10 @@
 from langchain_community.vectorstores import Pinecone
 
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import PromptTemplate
+from langchain.chains.conversation.base import ConversationChain
+from langchain.chains.conversation.memory import ConversationBufferMemory
+from langchain_core.messages.human import HumanMessage
+from langchain.memory import ConversationBufferMemory
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.document_loaders import PyPDFLoader
@@ -84,7 +88,7 @@ def get_response(query, model, top_k_val):
                 Question: {question}
                 """
     
-    prompt = ChatPromptTemplate.from_template(template)
+    prompt = PromptTemplate.from_template(template)
 
     # RAG
     chain = (
@@ -127,8 +131,13 @@ def get_response1(query, model, top_k_val):
                 {text_chunks}
                 Question: {query}
                 """
-    
-    response = model.invoke(prompt).content
+    query = HumanMessage(query)
+    chain = ConversationChain(
+        llm=model,
+        memory=ConversationBufferMemory()
+    )
+
+    response = chain.invoke(prompt)['response']
 
     return response, top_k_chunks
 
