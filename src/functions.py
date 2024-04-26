@@ -8,7 +8,8 @@ import unicodedata
 
 # import splitters library
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_text_splitters import NLTKTextSplitter
+from langchain.text_splitter import SpacyTextSplitter
+from langchain.text_splitter import CharacterTextSplitter
 
 
 import streamlit as st
@@ -145,30 +146,7 @@ def read_pdf(file_path):
 
 
 # Process pdfs and return text
-def process_documents_chunk1(documents):
-    '''
-    @param documents: List of documents.
-    @return: a long sting. Concatenated text from document.
-    '''
-    doc_text = ''
-    for doc in documents:
-
-        text = doc.page_content
-        text = text.replace('\n', ' ')
-        # Remove unknown characters
-        text = ''.join(c for c in text if unicodedata.category(c) != 'Co')
-        # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text).strip()
-        # Remove non-alphanumeric characters
-        text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
-        # Convert to lowercase
-        text = text.lower()
-        doc_text += text
-
-    return doc_text
-
-# Process pdfs and return text
-def process_documents_chunk2(documents):
+def process_documents(documents):
     '''
     @param documents: List of documents.
     @return: a long sting. Concatenated text from document.
@@ -182,64 +160,52 @@ def process_documents_chunk2(documents):
         # Remove extra whitespace
         text = re.sub(r'\s+', ' ', text).strip()
         # Remove non-alphanumeric characters
-        text = re.sub(r'[^a-zA-Z0-9\s.,]', '', text)
+        text = re.sub(r'[^a-zA-Z0-9\s,.]', '', text)
         # Convert to lowercase
         text = text.lower()
         doc_text += text
 
     return doc_text
 
-# Process pdfs and return text
-def process_documents_chunk3(documents):
-    '''
-    @param documents: List of documents.
-    @return: a long sting. Concatenated text from document.
-    '''
-    doc_text = ''
-    for doc in documents:
-
-        text = doc.page_content
-        # Remove unknown characters
-        text = ''.join(c for c in text if unicodedata.category(c) != 'Co')
-        # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text).strip()
-        # Remove non-alphanumeric characters
-        text = re.sub(r'[^a-zA-Z0-9\s.,]', '', text)
-        # Convert to lowercase
-        text = text.lower()
-        doc_text += text
-
-    return doc_text
-
-def chunking1(text):
+def character_text_splitter(text):
     '''
     @param text: a long string
     @return: a list of strings. Each string is a chunk of the text.
     '''
-    chunk_size = len(text) // 10
-    chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
-    return chunks
+    text_splitter = CharacterTextSplitter(        
+        separator = " ", # split by space
+        chunk_size = 100, # split into chunks of 1000 characters
+        chunk_overlap  = 20, # overlap by 200 characters
+        length_function = len, # use len function to calculate length
+    )
+    texts = text_splitter.split_text(text)
+    return texts
 
-def chunking2(text):
+def recursive_character_text_splitter(text):
     '''
     @param text: a long string
     @return: a list of strings. Each string is a chunk of the text.
     '''
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=100,
-        chunk_overlap=20,
-        length_function=len,
-        is_separator_regex=False,
+        chunk_size=100, # split into chunks of 100 characters
+        chunk_overlap=20, # overlap by 20 characters
+        length_function=len, 
+        separators=["\n\n", "\n","(?<=\. )", " ", ""], # split by new line, space, and period
+        is_separator_regex=True, # use regex for separators
     )
     texts = text_splitter.split_text(text)
     return texts
     
-def chunking3(text):
+def spacy_text_splitter(text):
     '''
     @param text: a long string
     @return: a list of strings. Each string is a chunk of the text.
     '''
-    text_splitter = NLTKTextSplitter(chunk_size=1000)
+    text_splitter = SpacyTextSplitter(
+        pipeline="en_core_web_sm",
+        chunk_size=200,
+        chunk_overlap=0,
+    )
     texts = text_splitter.split_text(text)
     return texts
 

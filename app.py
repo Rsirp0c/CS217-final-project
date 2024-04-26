@@ -64,7 +64,7 @@ with upload:
         st.write("**Current Embedding model is: ", '`'+embed+'`**') 
     
     chunk = st.radio( "###### Choose chunking strategy 👇",
-                    options = ["chunk1", "chunk2", "chunk3"],
+                    options = ["character text splitter", "recursive character text splitter", "spacy text splitter"],
                     help="Choose different chunking strategies to split the document into smaller parts"
                     # captions=["Chunk 1", "Chunk 2", "Chunk 3"]
                     )
@@ -77,16 +77,14 @@ with upload:
         with open(path, "wb") as f:
                 f.write(uploaded_file.getvalue())
         documents = read_pdf(path)
-        if chunk == "chunk1":
-            processed_text = process_documents_chunk1(documents)
-            processed_text = chunking1(processed_text)
-        elif chunk == "chunk2":
-            processed_text = process_documents_chunk2(documents)
-            processed_text = chunking2(processed_text)
-        elif chunk == "chunk3":
-            processed_text = process_documents_chunk3(documents)
-            processed_text = chunking3(processed_text)
-        upSertEmbeds(processed_text, index)
+        processed_text = process_documents(documents)
+        if chunk == "character text splitter":
+            processed_text_chunks = character_text_splitter(processed_text)
+        elif chunk == "recursive character text splitter":
+            processed_text_chunks = recursive_character_text_splitter(processed_text)
+        elif chunk == "spacy text splitter":
+            processed_text_chunks = spacy_text_splitter(processed_text)
+        upSertEmbeds(processed_text_chunks, index)
 
 # ----------------- Respond setting -----------------
 
@@ -98,10 +96,11 @@ with respond:
     if st.session_state.current_dataset:
         metric = st.session_state.datasets[st.session_state.current_dataset][2]
         st.write("**Current distence metric is: ", '`'+metric+'`**') 
-    if st.session_state.current_dataset:
-        max_k = index.describe_index_stats()['namespaces']['']['vector_count']
-    else:
-        max_k = 5
+    # if st.session_state.current_dataset:
+    #     max_k = index.describe_index_stats()['namespaces']['']['vector_count']
+    #     # max_k = index.describe_index_stats()['total_vector_count']
+    # else:
+    max_k = 5
     recall_number = st.number_input('###### Choose the number of retrieval',value=3, step=1, min_value=1, max_value=max_k)
 
     model = st.radio('###### Select the LLM model 👇', 
