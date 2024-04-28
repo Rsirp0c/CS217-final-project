@@ -131,6 +131,24 @@ if st.session_state.top_k_chunks:
 )
 
 "---"
+# ----------------- filters -----------------
+
+# Initialize filters dictionary
+filters = {}
+
+# User inputs for different filters
+organization = st.text_input("Enter organization filter:")
+person_name = st.text_input("Enter person name filter:")
+date = st.text_input("Enter time filter:")
+
+# Save filters to the dictionary
+if organization:
+    filters['ORG_entities'] = organization
+if person_name:
+    filters['PERSON_entities'] = person_name
+if date:
+    filters['DATE_entities'] = date
+
 # ----------------- Chat -----------------
 
 st.write("### Chat here 👋")
@@ -166,8 +184,8 @@ if prompt := st.chat_input("What is up?"):
 
     with st.chat_message("assistant"):
         if uploaded_file or st.session_state.current_dataset: 
-            response, top_k_chunks = get_response1(prompt, client, recall_number)
-            print(top_k_chunks)
+            response, top_k_chunks = get_response1(prompt, client, recall_number, filters)
+            # print(top_k_chunks)
             # response = client.invoke(prompt).content
             # response = get_response(prompt, client, recall_number)
         else:

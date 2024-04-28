@@ -11,6 +11,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.text_splitter import SpacyTextSplitter
 from langchain.text_splitter import CharacterTextSplitter
 
+# import spacy
+import spacy
+from collections import defaultdict
 
 import streamlit as st
 import cohere
@@ -54,10 +57,20 @@ def upSertEmbeds(processed_text, index):
     vectors = []
 
     for i in range(shape[0]):
+        #named entity recognition
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(processed_text[i])
+        entities_category = [ent.label_ for ent in doc.ents]
+        entities_by_category = defaultdict(list)
+        for ent, category in zip(doc.ents, entities_category):
+            entities_by_category[category].append(ent.text)
+        entities_by_category = dict(entities_by_category)
         vector = {'id': str(i),
                   'values': embeds[i],
-                  'metadata': {'text': processed_text[i]}
-                 }
+                  'metadata': {'text': processed_text[i],
+                               **{f'{category}_entities': named_entities for category, named_entities in entities_by_category.items()}
+                    }  
+        }
         vectors.append(vector)
 
     index.upsert(vectors)
@@ -105,7 +118,7 @@ def get_response(query, model, top_k_val):
 
     return response
 
-def get_response1(query, model, top_k_val):
+def get_response1(query, model, top_k_val, filters):
     '''
     @param query: a string. The question to ask the model.
     @param model: a string. The model to use for the response.
@@ -121,6 +134,7 @@ def get_response1(query, model, top_k_val):
     top_k_chunks = index.query(
                         vector = query_vector,
                         top_k = top_k_val,
+                        filter= filters,
                         include_values = False,
                         include_metadata = True
                     )
