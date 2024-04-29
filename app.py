@@ -100,8 +100,8 @@ with respond:
     #     max_k = index.describe_index_stats()['namespaces']['']['vector_count']
     #     # max_k = index.describe_index_stats()['total_vector_count']
     # else:
-    max_k = 5
-    recall_number = st.number_input('###### Choose the number of retrieval',value=3, step=1, min_value=1, max_value=max_k)
+    # max_k = 5
+    recall_number = st.number_input('###### Choose the number of retrieval',value=3, step=1, min_value=1)
 
     model = st.radio('###### Select the LLM model 👇', 
                          ['OpenAI', 'Cohere', 'TinyLlama'], 
