@@ -216,6 +216,7 @@ if prompt := st.chat_input("What is up?"):
                     st.data_editor(df, hide_index=True)
                 text_chunks = []
                 for query in queries:
+
                     text_chunk, top_k_chunks = retrieve_documents(query, recall_number, filters)
                     text_chunks += text_chunk
                 print("all docs retrieved")

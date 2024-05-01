@@ -16,6 +16,7 @@ langchain_community
 langchain_text_splitters
 
 
+
 transformers
 tqdm 
 openpyxl
