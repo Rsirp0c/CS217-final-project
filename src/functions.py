@@ -65,49 +65,50 @@ def upSertEmbeds(processed_text, index):
     index.upsert(vectors)
 
 
-def get_response(query, model, top_k_val):
-    '''
-    @param query: a string. The question to ask the model.
-    @param model: a string. The model to use for the response.
-    @param recall: an int. The number of documents to retrieve.
-    @return: a string. The response from the model.
-    '''
-    query_vector = embed([query]).tolist()
-    pc = PineconeClient(api_key=st.session_state.api_keys['pinecone_api_key'])
-    index = pc.Index(st.session_state.current_dataset)
+# def get_response(query, model, top_k_val, filters):
+#     '''
+#     @param query: a string. The question to ask the model.
+#     @param model: a string. The model to use for the response.
+#     @param recall: an int. The number of documents to retrieve.
+#     @return: a string. The response from the model.
+#     '''
+#     query_vector = embed([query]).tolist()
+#     pc = PineconeClient(api_key=st.session_state.api_keys['pinecone_api_key'])
+#     index = pc.Index(st.session_state.current_dataset)
 
-    top_k_chunks = index.query(
-                        vector = query_vector,
-                        top_k = top_k_val,
-                        include_values = False,
-                        include_metadata = True
-                    )
+#     top_k_chunks = index.query(
+#                         vector = query_vector,
+#                         top_k = top_k_val,
+#                         filter= filters,
+#                         include_values = False,
+#                         include_metadata = True
+#                     )
     
-    retrieved_chunks = [match['metadata'].get('text', 'Default text') for match in top_k_chunks['matches']]
+#     retrieved_chunks = [match['metadata'].get('text', 'Default text') for match in top_k_chunks['matches']]
 
-    # RAG prompt
-    template =  """
-                Answer the question based only on the following context:
-                {context}
-                Question: {question}
-                """
+#     # RAG prompt
+#     template =  """
+#                 Answer the question based only on the following context:
+#                 {context}
+#                 Question: {question}
+#                 """
     
-    prompt = ChatPromptTemplate.from_template(template)
+#     prompt = ChatPromptTemplate.from_template(template)
 
-    # RAG
-    chain = (
-        RunnableParallel(
-            {"context": retrieved_chunks, "question": RunnablePassthrough()})
-        | prompt
-        | model
-        | StrOutputParser()
-    )
+#     # RAG
+#     chain = (
+#         RunnableParallel(
+#             {"context": retrieved_chunks, "question": RunnablePassthrough()})
+#         | prompt
+#         | model
+#         | StrOutputParser()
+#     )
 
-    response = chain.invoke(query)
+#     response = chain.invoke(query)
 
-    return response
+#     return response
 
-def retrieve_documents(query, top_k_val):
+def retrieve_documents(query, top_k_val, filters):
     '''
     @param query: a string. The question to ask the model.
     @param top_k_val: an int. The number of documents to retrieve.
@@ -122,6 +123,7 @@ def retrieve_documents(query, top_k_val):
     top_k_chunks = index.query(
                         vector = query_vector,
                         top_k = top_k_val,
+                        filter= filters,
                         include_values = False,
                         include_metadata = True
                     )
@@ -129,7 +131,7 @@ def retrieve_documents(query, top_k_val):
 
     return text_chunks, top_k_chunks
 
-def get_response1(query, model, text_chunks):
+def get_response(query, model, text_chunks):
     '''
     @param query: a string. The question to ask the model.
     @param model: a string. The model to use for the response.
@@ -182,9 +184,17 @@ def character_text_splitter(text):
     @param text: a long string
     @return: a list of strings. Each string is a chunk of the text.
     '''
-    text_splitter = CharacterTextSplitter(        
+
+    chunk_size = 100
+
+    if len(text) > 2000:
+        chunk_size = 200
+    elif len(text) < 500:
+        chunk_size = 50  
+
+    text_splitter = CharacterTextSplitter(   
         separator = " ", # split by space
-        chunk_size = 100, # split into chunks of 1000 characters
+        chunk_size = chunk_size, # split into chunks of 1000 characters
         chunk_overlap  = 20, # overlap by 200 characters
         length_function = len, # use len function to calculate length
     )
@@ -196,8 +206,16 @@ def recursive_character_text_splitter(text):
     @param text: a long string
     @return: a list of strings. Each string is a chunk of the text.
     '''
+
+    chunk_size = 100
+
+    if len(text) > 2000:
+        chunk_size = 200
+    elif len(text) < 500:
+        chunk_size = 50  
+
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=100, # split into chunks of 100 characters
+        chunk_size=chunk_size, # split into chunks of 100 characters
         chunk_overlap=20, # overlap by 20 characters
         length_function=len, 
         separators=["\n\n", "\n","(?<=\. )", " ", ""], # split by new line, space, and period
@@ -211,9 +229,17 @@ def spacy_text_splitter(text):
     @param text: a long string
     @return: a list of strings. Each string is a chunk of the text.
     '''
+
+    chunk_size = 100
+
+    if len(text) > 2000:
+        chunk_size = 200
+    elif len(text) < 500:
+        chunk_size = 50 
+
     text_splitter = SpacyTextSplitter(
         pipeline="en_core_web_sm",
-        chunk_size=200,
+        chunk_size=chunk_size,
         chunk_overlap=0,
     )
     texts = text_splitter.split_text(text)
@@ -242,6 +268,8 @@ def generate_queries(model, prompt, num_queries):
 
 def get_reranked_result(query, docs, top_n):
     co = cohere.Client(st.session_state.api_keys['cohere_api_key'])
+    if(len(docs) == 0):
+        return {}
     rerank_results = co.rerank(model="rerank-english-v2.0", query=query, documents=docs, top_n=top_n, return_documents=True)
     results = {}
     for idx, r in enumerate(rerank_results.results):

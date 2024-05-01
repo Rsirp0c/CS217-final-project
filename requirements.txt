@@ -16,3 +16,9 @@ langchain_community
 langchain_text_splitters
 
 
+
+transformers
+tqdm 
+openpyxl
+pandas
+datasets

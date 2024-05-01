@@ -146,6 +146,34 @@ on = st.toggle('Activate feature')
 if on:
     st.session_state.advanced_option = True
 "---"
+
+# ----------------- filters -----------------
+
+"#### :blue[Retrieval through key words](optional)"
+'''
+**Description:**\n
+The normal retrival will return top_k chunks, this function can enable users to retrive based the key words(Named Entity) they enter.\n 
+'''
+# Initialize filters dictionary
+filters = {}
+on = st.toggle('Activate Customized Retrieval')
+if on:
+
+    # User inputs for different filters
+    organization = st.text_input("Enter organization filter:")
+    person_name = st.text_input("Enter person name filter:")
+    date = st.text_input("Enter time filter:")
+
+    # Save filters to the dictionary
+    if organization:
+        filters['ORG_entities'] = organization
+    if person_name:
+        filters['PERSON_entities'] = person_name
+    if date:
+        filters['DATE_entities'] = date
+# else:
+# todo: add the else condition to remove the filters
+    
 # ----------------- Chat -----------------
 
 st.write("### Chat here 👋")
@@ -188,15 +216,16 @@ if prompt := st.chat_input("What is up?"):
                     st.data_editor(df, hide_index=True)
                 text_chunks = []
                 for query in queries:
-                    text_chunk, top_k_chunks = retrieve_documents(query, recall_number)
+
+                    text_chunk, top_k_chunks = retrieve_documents(query, recall_number, filters)
                     text_chunks += text_chunk
                 print("all docs retrieved")
                 reranked_result = get_reranked_result(prompt, text_chunks, recall_number)
-                response = get_response1(prompt, client, reranked_result)
+                response = get_response(prompt, client, reranked_result)
             else:
-                text_chunks, top_k_chunks = retrieve_documents(prompt, recall_number)
-                response, top_k_chunks = get_response1(prompt, client, text_chunks)
-            print(top_k_chunks)
+                text_chunk, top_k_chunks = retrieve_documents(prompt, recall_number, filters)
+                response = get_response(prompt, client, text_chunk)
+            # print(top_k_chunks)
             # response = client.invoke(prompt).content
             # response = get_response(prompt, client, recall_number)
         else:
