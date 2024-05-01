@@ -154,17 +154,10 @@ if on:
 **Description:**\n
 The normal retrival will return top_k chunks, this function can enable users to retrive based the key words(Named Entity) they enter.\n 
 '''
-
-if 'ner_function' not in st.session_state:
-    st.session_state.ner_function = False
+# Initialize filters dictionary
+filters = {}
 on = st.toggle('Activate Customized Retrieval')
 if on:
-    st.session_state.ner_function = True
-"---"
-
-if st.session_state.ner_function:
-    # Initialize filters dictionary
-    filters = {}
 
     # User inputs for different filters
     organization = st.text_input("Enter organization filter:")
@@ -223,15 +216,15 @@ if prompt := st.chat_input("What is up?"):
                     st.data_editor(df, hide_index=True)
                 text_chunks = []
                 for query in queries:
-                    text_chunk, top_k_chunks = retrieve_documents(query, recall_number)
+                    text_chunk, top_k_chunks = retrieve_documents(query, recall_number, filters)
                     text_chunks += text_chunk
                 print("all docs retrieved")
                 reranked_result = get_reranked_result(prompt, text_chunks, recall_number)
-                response = get_response_general(prompt, client, reranked_result, filters)
+                response = get_response(prompt, client, reranked_result)
             else:
-                text_chunks, top_k_chunks = retrieve_documents(prompt, recall_number)
-                response, top_k_chunks = get_response_general(prompt, client, text_chunks, filters)
-            print(top_k_chunks)
+                text_chunk, top_k_chunks = retrieve_documents(prompt, recall_number, filters)
+                response = get_response(prompt, client, text_chunk)
+            # print(top_k_chunks)
             # response = client.invoke(prompt).content
             # response = get_response(prompt, client, recall_number)
         else:
