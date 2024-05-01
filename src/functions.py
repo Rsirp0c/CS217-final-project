@@ -18,6 +18,8 @@ from pinecone import Pinecone as PineconeClient
 from sentence_transformers import SentenceTransformer
 import os
 import re
+import json
+import ast
 import numpy as np
 
 embed2dim = { # embeddings to dimensions
@@ -63,7 +65,7 @@ def upSertEmbeds(processed_text, index):
     index.upsert(vectors)
 
 
-def get_response(query, model, top_k_val):
+def get_response(query, model, top_k_val, filters):
     '''
     @param query: a string. The question to ask the model.
     @param model: a string. The model to use for the response.
@@ -77,6 +79,7 @@ def get_response(query, model, top_k_val):
     top_k_chunks = index.query(
                         vector = query_vector,
                         top_k = top_k_val,
+                        filter= filters,
                         include_values = False,
                         include_metadata = True
                     )
@@ -105,12 +108,11 @@ def get_response(query, model, top_k_val):
 
     return response
 
-def get_response1(query, model, top_k_val):
+def retrieve_documents(query, top_k_val):
     '''
     @param query: a string. The question to ask the model.
-    @param model: a string. The model to use for the response.
-    @param recall: an int. The number of documents to retrieve.
-    @return: a string. The response from the model.
+    @param top_k_val: an int. The number of documents to retrieve.
+    @return: a list of strings. Each string is a chunk of the text.
     '''
     query_vector = embed([query])
     if type(query_vector) != list:
@@ -124,8 +126,17 @@ def get_response1(query, model, top_k_val):
                         include_values = False,
                         include_metadata = True
                     )
-    
     text_chunks = [match['metadata'].get('text', 'Default text') for match in top_k_chunks['matches']]
+
+    return text_chunks, top_k_chunks
+
+def get_response_general(query, model, text_chunks):
+    '''
+    @param query: a string. The question to ask the model.
+    @param model: a string. The model to use for the response.
+    @param recall: an int. The number of documents to retrieve.
+    @return: a string. The response from the model.
+    '''
 
     # RAG prompt
     prompt =  f"""
@@ -136,7 +147,7 @@ def get_response1(query, model, top_k_val):
     
     response = model.invoke(prompt).content
 
-    return response, top_k_chunks
+    return response
 
 # Reading pdfs
 def read_pdf(file_path):
@@ -209,3 +220,35 @@ def spacy_text_splitter(text):
     texts = text_splitter.split_text(text)
     return texts
 
+def str_to_json(s):
+    try:
+        # First, attempt to parse the string as JSON
+        return json.loads(s)
+    except json.JSONDecodeError:
+        # If it fails, assume the string might be a Python literal
+        try:
+            return ast.literal_eval(s)
+        except (ValueError, SyntaxError):
+            # Handle the case where parsing fails for both methods
+            print("Error: Input string is neither valid JSON nor a valid Python literal.")
+            return None
+
+def generate_queries(model, prompt, num_queries):
+    '''
+    for generating questions based on a prompt
+    '''
+    query_generation_prompt = ChatPromptTemplate.from_template("Given the prompt: '{prompt}', generate {num_queries} questions that are better articulated. Return in the form of an list. For example: ['question 1', 'question 2', 'question 3']")
+    query_generation_chain = query_generation_prompt | model
+    return str_to_json(query_generation_chain.invoke({"prompt": prompt, "num_queries": num_queries}).content)
+
+def get_reranked_result(query, docs, top_n):
+    co = cohere.Client(st.session_state.api_keys['cohere_api_key'])
+    rerank_results = co.rerank(model="rerank-english-v2.0", query=query, documents=docs, top_n=top_n, return_documents=True)
+    results = {}
+    for idx, r in enumerate(rerank_results.results):
+        rank = idx + 1
+        document_index = r.index
+        document = r.document.text
+        score =  f"{r.relevance_score:.2f}"
+        results[rank] = {"document": document, "score": score, "index": document_index}
+    return results
