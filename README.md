@@ -7,7 +7,8 @@
 2. Run `python3 -m venv venv` to create a virtual environment
 3. Run `source venv/bin/activate` to activate the virtual environment
 4. Run `pip install -r requirements.txt` to install the required packages
-5. Run `streamlit run app.py` to run the code
+5. Run `python -m spacy download en_core_web_sm` in the terminal
+6. Run `streamlit run app.py` to run the code
 
 ## Set up the secret keys for dev mode:
 1. `CD` to the project directory
