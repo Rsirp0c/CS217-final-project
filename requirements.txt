@@ -13,12 +13,7 @@ langchain_core
 langchain_openai
 langchain_cohere
 langchain_community
+langchain_experimental
 langchain_text_splitters
 
-
-
-transformers
-tqdm 
-openpyxl
-pandas
-datasets
+ragas

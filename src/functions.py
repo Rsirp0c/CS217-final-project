@@ -185,12 +185,10 @@ def character_text_splitter(text):
     @return: a list of strings. Each string is a chunk of the text.
     '''
 
-    chunk_size = 100
+    chunk_size = 500
 
     if len(text) > 2000:
-        chunk_size = 200
-    elif len(text) < 500:
-        chunk_size = 50  
+        chunk_size = 800
 
     text_splitter = CharacterTextSplitter(   
         separator = " ", # split by space
@@ -207,12 +205,10 @@ def recursive_character_text_splitter(text):
     @return: a list of strings. Each string is a chunk of the text.
     '''
 
-    chunk_size = 100
+    chunk_size = 500
 
     if len(text) > 2000:
-        chunk_size = 200
-    elif len(text) < 500:
-        chunk_size = 50  
+        chunk_size = 800 
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size, # split into chunks of 100 characters
@@ -230,12 +226,10 @@ def spacy_text_splitter(text):
     @return: a list of strings. Each string is a chunk of the text.
     '''
 
-    chunk_size = 100
+    chunk_size = 500
 
     if len(text) > 2000:
-        chunk_size = 200
-    elif len(text) < 500:
-        chunk_size = 50 
+        chunk_size = 800
 
     text_splitter = SpacyTextSplitter(
         pipeline="en_core_web_sm",
