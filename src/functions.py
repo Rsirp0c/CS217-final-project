@@ -95,14 +95,27 @@ def get_response(query, model, text_chunks):
     @return: a string. The response from the model.
     '''
 
-    # RAG prompt
-    prompt =  f"""
+    #  RAG prompt
+    template =  """
                 Answer the question based only on the following context:
-                {text_chunks}
-                Question: {query}
+                {context}
+                Question: {question}
                 """
     
-    response = model.invoke(prompt).content
+    prompt = ChatPromptTemplate.from_template(template)
+
+    # RAG
+    chain = (
+        RunnableParallel(
+            {"context": lambda x:text_chunks, "question": RunnablePassthrough()})
+        | prompt
+        | model
+        | StrOutputParser()
+    )
+
+    response = chain.invoke(query)
+
+    return response
 
     return response
 
