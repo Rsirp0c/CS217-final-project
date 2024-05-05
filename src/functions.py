@@ -64,50 +64,6 @@ def upSertEmbeds(processed_text, index):
 
     index.upsert(vectors)
 
-
-# def get_response(query, model, top_k_val, filters):
-#     '''
-#     @param query: a string. The question to ask the model.
-#     @param model: a string. The model to use for the response.
-#     @param recall: an int. The number of documents to retrieve.
-#     @return: a string. The response from the model.
-#     '''
-#     query_vector = embed([query]).tolist()
-#     pc = PineconeClient(api_key=st.session_state.api_keys['pinecone_api_key'])
-#     index = pc.Index(st.session_state.current_dataset)
-
-#     top_k_chunks = index.query(
-#                         vector = query_vector,
-#                         top_k = top_k_val,
-#                         filter= filters,
-#                         include_values = False,
-#                         include_metadata = True
-#                     )
-    
-#     retrieved_chunks = [match['metadata'].get('text', 'Default text') for match in top_k_chunks['matches']]
-
-#     # RAG prompt
-#     template =  """
-#                 Answer the question based only on the following context:
-#                 {context}
-#                 Question: {question}
-#                 """
-    
-#     prompt = ChatPromptTemplate.from_template(template)
-
-#     # RAG
-#     chain = (
-#         RunnableParallel(
-#             {"context": retrieved_chunks, "question": RunnablePassthrough()})
-#         | prompt
-#         | model
-#         | StrOutputParser()
-#     )
-
-#     response = chain.invoke(query)
-
-#     return response
-
 def retrieve_documents(query, top_k_val, filters):
     '''
     @param query: a string. The question to ask the model.
@@ -273,3 +229,46 @@ def get_reranked_result(query, docs, top_n):
         score =  f"{r.relevance_score:.2f}"
         results[rank] = {"document": document, "score": score, "index": document_index}
     return results
+
+# def get_response(query, model, top_k_val, filters):
+#     '''
+#     @param query: a string. The question to ask the model.
+#     @param model: a string. The model to use for the response.
+#     @param recall: an int. The number of documents to retrieve.
+#     @return: a string. The response from the model.
+#     '''
+#     query_vector = embed([query]).tolist()
+#     pc = PineconeClient(api_key=st.session_state.api_keys['pinecone_api_key'])
+#     index = pc.Index(st.session_state.current_dataset)
+
+#     top_k_chunks = index.query(
+#                         vector = query_vector,
+#                         top_k = top_k_val,
+#                         filter= filters,
+#                         include_values = False,
+#                         include_metadata = True
+#                     )
+    
+#     retrieved_chunks = [match['metadata'].get('text', 'Default text') for match in top_k_chunks['matches']]
+
+#     # RAG prompt
+#     template =  """
+#                 Answer the question based only on the following context:
+#                 {context}
+#                 Question: {question}
+#                 """
+    
+#     prompt = ChatPromptTemplate.from_template(template)
+
+#     # RAG
+#     chain = (
+#         RunnableParallel(
+#             {"context": retrieved_chunks, "question": RunnablePassthrough()})
+#         | prompt
+#         | model
+#         | StrOutputParser()
+#     )
+
+#     response = chain.invoke(query)
+
+#     return response

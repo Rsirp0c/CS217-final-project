@@ -18,7 +18,7 @@ def add_dataset():
             index_name = name
             pc.create_index(
                 name=index_name,
-                dimension=embed2dim[model],        ### need to change 
+                dimension=embed2dim[model],       
                 metric=metrics,
                 spec=ServerlessSpec(
                     cloud='aws', 

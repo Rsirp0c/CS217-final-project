@@ -88,9 +88,6 @@ with upload:
 
 # ----------------- Respond setting -----------------
 
-if 'top_k_chunks' not in st.session_state:
-    st.session_state.top_k_chunks = None
-
 with respond:
     "#### :blue[Calling] & :blue[Responding]"
     if st.session_state.current_dataset:
@@ -108,72 +105,58 @@ with respond:
                          help='Choose different LLM models to generate responses')
     if model == 'TinyLlama':
         st.warning('Follow the insturction [here](https://python.langchain.com/docs/integrations/llms/llamafile/) and download the TinyLlama model before use!', icon="⚠️")
-
-if st.session_state.top_k_chunks:
-    df = pd.DataFrame(
-        {
-        'id': [match['id'] for match in st.session_state.top_k_chunks['matches']],
-        'score': [match['score'] for match in st.session_state.top_k_chunks['matches']],
-        'text': [' '.join(match['metadata']['text'].split()[:10])+'...' for match in st.session_state.top_k_chunks['matches']]
-        }
-    )
-    st.data_editor(
-    df,
-    column_config={
-        "score": st.column_config.ProgressColumn(
-            "similarity score",
-            help="The similarity score between the query and the document.",
-            min_value=0,
-            max_value=1,
-        ),
-    },
-    hide_index=True,
-)
+        
+"---"
+prompt, _, filter = st.columns([1, 0.1, 1])
 # ----------------- prompt engineer -----------------
-"---"
-"#### :blue[Prompt Generation] & :blue[Reranking](optional)"
-'''
-**Description:**\n
-The normal retrival will use the **single** provided prompt to retrive the **top_k** documents.\n 
-However, this feature:
-1. Generate **a list of questions** based on the prompt you provided.
-2. Use the generated questions to retrive `len(questions)*top_k` documents.
-3. Rerank the documents using default `Cohere Rerank model` based on your initial prompt.
-'''
-if 'advanced_option' not in st.session_state:
-    st.session_state.advanced_option = False
-on = st.toggle('Activate feature')
-if on:
-    st.session_state.advanced_option = True
-"---"
+with prompt:
+    
+    "#### :blue[Prompt Generation] & :blue[Reranking](optional)"
+    '''
+    **Description:**\n
+    The normal retrival will use the **single** provided prompt to retrive the **top_k** chunks. However, this feature:
+    1. Generate **a list of questions** based on the prompt you provided.
+    2. Use the generated questions to retrive `len(questions)*top_k` documents.
+    3. Rerank the documents using default `Cohere Rerank model` based on your initial prompt.
+    '''
+    if 'advanced_option' not in st.session_state:
+        st.session_state.advanced_option = False
+    on = st.toggle('Activate feature')
+    if on:
+        st.session_state.advanced_option = True
+    else:
+        st.session_state.advanced_option = False
+    
 
 # ----------------- filters -----------------
+with filter:
+    "#### :blue[Retrieval through key words](optional)"
+    '''
+    **Description:**\n
+    The normal retrival will return top_k chunks, 
+    this function can enable users to retrive based on the **key words(Named Entity)** retrived from the prompt.\n 
+    This function is power by `spaCy` model.
+    '''
+    # Initialize filters dictionary
+    filters = {}
+    on = st.toggle('Activate Customized Retrieval')
+    if on:
 
-"#### :blue[Retrieval through key words](optional)"
-'''
-**Description:**\n
-The normal retrival will return top_k chunks, this function can enable users to retrive based the key words(Named Entity) they enter.\n 
-'''
-# Initialize filters dictionary
-filters = {}
-on = st.toggle('Activate Customized Retrieval')
-if on:
+        # User inputs for different filters
+        organization = st.text_input("Enter organization filter:")
+        person_name = st.text_input("Enter person name filter:")
+        date = st.text_input("Enter time filter:")
 
-    # User inputs for different filters
-    organization = st.text_input("Enter organization filter:")
-    person_name = st.text_input("Enter person name filter:")
-    date = st.text_input("Enter time filter:")
-
-    # Save filters to the dictionary
-    if organization:
-        filters['ORG_entities'] = organization
-    if person_name:
-        filters['PERSON_entities'] = person_name
-    if date:
-        filters['DATE_entities'] = date
-# else:
-# todo: add the else condition to remove the filters
-    
+        # Save filters to the dictionary
+        if organization:
+            filters['ORG_entities'] = organization
+        if person_name:
+            filters['PERSON_entities'] = person_name
+        if date:
+            filters['DATE_entities'] = date
+    # else:
+    # todo: add the else condition to remove the filters
+"---"
 # ----------------- Chat -----------------
 
 st.write("### Chat here 👋")
@@ -215,17 +198,18 @@ if prompt := st.chat_input("What is up?"):
                 if queries:
                     df = pd.DataFrame(queries, columns=['Generated Questions'])
                     st.data_editor(df, hide_index=True, width=1200)
-                text_chunks = []
-                for query in queries:
-                    text_chunk, top_k_chunks = retrieve_documents(query, recall_number)
-                    text_chunks += text_chunk
-                print("all docs retrieved")
-                reranked_result = get_reranked_result(prompt, text_chunks, recall_number)
-                response = get_response1(prompt, client, reranked_result)
+                    text_chunks = []
+                    for query in queries:
+                        retrive_num = recall_number // num_queries + 3
+                        text_chunk, top_k_chunks = retrieve_documents(query, recall_number, filters)
+                        text_chunks += text_chunk
+                    print("all docs retrieved")
+                    reranked_result = get_reranked_result(prompt, text_chunks, recall_number)
+                    response = get_response(prompt, client, reranked_result)
             else:
-                text_chunks, top_k_chunks = retrieve_documents(prompt, recall_number)
-                response, top_k_chunks = get_response1(prompt, client, text_chunks)
-            print(top_k_chunks)
+                text_chunks, top_k_chunks = retrieve_documents(prompt, recall_number, filters)
+                response = get_response(prompt, client, text_chunks)
+            # print(top_k_chunks)
             # response = client.invoke(prompt).content
             # response = get_response(prompt, client, recall_number)
         else:
@@ -237,7 +221,7 @@ if prompt := st.chat_input("What is up?"):
                     {
                     'id': [match['id'] for match in top_k_chunks['matches']],
                     'score': [match['score'] for match in top_k_chunks['matches']],
-                    'text': [' '.join(match['metadata']['text'].split()[:20])+'...' for match in top_k_chunks['matches']]
+                    'text': [' '.join(match['metadata']['text'].split())+'...' for match in top_k_chunks['matches']]
                     }
                 )
                 st.data_editor(df,
