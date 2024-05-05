@@ -210,22 +210,22 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("assistant"):
         if uploaded_file or st.session_state.current_dataset: 
             if st.session_state.advanced_option:
-                queries = generate_queries(client, prompt, recall_number)
+                num_queries = min(max(recall_number // 10, 5), 10)
+                queries = generate_queries(client, prompt, num_queries)
                 if queries:
                     df = pd.DataFrame(queries, columns=['Generated Questions'])
-                    st.data_editor(df, hide_index=True)
+                    st.data_editor(df, hide_index=True, width=1200)
                 text_chunks = []
                 for query in queries:
-
-                    text_chunk, top_k_chunks = retrieve_documents(query, recall_number, filters)
+                    text_chunk, top_k_chunks = retrieve_documents(query, recall_number)
                     text_chunks += text_chunk
                 print("all docs retrieved")
                 reranked_result = get_reranked_result(prompt, text_chunks, recall_number)
-                response = get_response(prompt, client, reranked_result)
+                response = get_response1(prompt, client, reranked_result)
             else:
-                text_chunk, top_k_chunks = retrieve_documents(prompt, recall_number, filters)
-                response = get_response(prompt, client, text_chunk)
-            # print(top_k_chunks)
+                text_chunks, top_k_chunks = retrieve_documents(prompt, recall_number)
+                response, top_k_chunks = get_response1(prompt, client, text_chunks)
+            print(top_k_chunks)
             # response = client.invoke(prompt).content
             # response = get_response(prompt, client, recall_number)
         else:
@@ -237,18 +237,19 @@ if prompt := st.chat_input("What is up?"):
                     {
                     'id': [match['id'] for match in top_k_chunks['matches']],
                     'score': [match['score'] for match in top_k_chunks['matches']],
-                    'text': [' '.join(match['metadata']['text'].split()[:13])+'...' for match in top_k_chunks['matches']]
+                    'text': [' '.join(match['metadata']['text'].split()[:20])+'...' for match in top_k_chunks['matches']]
                     }
                 )
                 st.data_editor(df,
-                column_config={
-                    "score": st.column_config.ProgressColumn(
-                        "similarity score",
-                        help="The similarity score between the query and the document.",
-                        min_value=0,
-                        max_value=1,
-                    ),},
-                hide_index=True,)
+                            column_config={
+                                "score": st.column_config.ProgressColumn(
+                                    "similarity score",
+                                    help="The similarity score between the query and the document.",
+                                    min_value=0,
+                                    max_value=1,
+                                    ),},
+                            hide_index=True,
+                            width=1200)
         
     st.session_state.messages.append({"role": "assistant", "content": response})
 
