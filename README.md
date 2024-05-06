@@ -23,18 +23,19 @@
 
 ## Steps to use the chat platform
 1. Set up the PineCone Index(Vector Database) by submitting the index creation form on the sidebar.
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot3.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot3.png">
 2. Upload the pdf file through the file uploader.
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot4.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot4.png">
 3. Select the desired chunking strategy among character text splitter, recursive character text splitter, and spacy text splitter.
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot5.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot5.png">
 4. Decide on how much chunks you want to retrieve every time you make a query.
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot6.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot6.png">
 5. Select the LLM to generate responses 
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot7.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot7.png">
 6. Switch on some advanced functions based on the provided guideline.
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot8.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot8.png">
 7. Start chat!
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot9.png">
 
 ## Group member:
 - Haoran Cheng
