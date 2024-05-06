@@ -16,7 +16,11 @@
 3. `touch .streamlit/secrets.toml`
 4. Add your secret keys to `secrets.toml`
 
-
+## Users can also set their API keys by submitting the API key form on the sidebar
+1. [How to get OpenAI API Keys](https://platform.openai.com/api-keys)
+2. [How to get Cohere API keys](https://dashboard.cohere.com/api-keys)
+3. [How to get PineCone API Keys](https://www.pinecone.io/?utm_term=pinecone%20db&utm_campaign=Brand+-+US/Canada&utm_source=adwords&utm_medium=ppc&hsa_acc=3111363649&hsa_cam=16223687665&hsa_grp=133738612775&hsa_ad=582256510975&hsa_src=g&hsa_tgt=kwd-1628011569784&hsa_kw=pinecone%20db&hsa_mt=p&hsa_net=adwords&hsa_ver=3&gad_source=1&gclid=CjwKCAjw3NyxBhBmEiwAyofDYSeG1vWfF6_vzhmYfdbvuS2VQRAqWSd-BzgeMS0-KaMHzU7rG-Oy4hoCWvIQAvD_BwE)
+   
 ## Group member:
 - Haoran Cheng
 - Xiaoran Liu
