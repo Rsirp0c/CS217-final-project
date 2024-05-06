@@ -15,6 +15,7 @@
 2. `mkdir .streamlit`
 3. `touch .streamlit/secrets.toml`
 4. Add your secret keys to `secrets.toml`
+5. Switch to dev mode
 
 ## Users can also set their API keys by submitting the API key form on the sidebar
 1. [How to get OpenAI API Keys](https://platform.openai.com/api-keys)
@@ -23,19 +24,19 @@
 
 ## Steps to use the chat platform
 1. Set up the PineCone Index(Vector Database) by submitting the index creation form on the sidebar.
-<img width="200"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot3.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot3.png">
 2. Upload the pdf file through the file uploader.
-<img width="200"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot4.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot4.png">
 3. Select the desired chunking strategy among character text splitter, recursive character text splitter, and spacy text splitter.
-<img width="200"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot5.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot5.png">
 4. Decide on how much chunks you want to retrieve every time you make a query.
-<img width="200"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot6.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot6.png">
 5. Select the LLM to generate responses 
-<img width="200"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot7.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot7.png">
 6. Switch on some advanced functions based on the provided guideline.
-<img width="200"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot8.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot8.png">
 7. Start chat!
-<img width="200"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot9.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot9.png">
 
 ## Group member:
 - Haoran Cheng
