@@ -193,7 +193,7 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("assistant"):
         if uploaded_file or st.session_state.current_dataset: 
             if st.session_state.advanced_option:
-                num_queries = min(max(recall_number // 10, 5), 10)
+                num_queries = min(max(recall_number // 10, 3), 10)
                 queries = generate_queries(client, prompt, num_queries)
                 if queries:
                     df = pd.DataFrame(queries, columns=['Generated Questions'])
@@ -205,7 +205,8 @@ if prompt := st.chat_input("What is up?"):
                         text_chunks += text_chunk
                     print("all docs retrieved")
                     reranked_result = get_reranked_result(prompt, text_chunks, recall_number)
-                    response = get_response(prompt, client, reranked_result)
+                    reranked_chunks = [entry['document'] for entry in reranked_result.values()]
+                    response = get_response(prompt, client, reranked_chunks)
             else:
                 text_chunks, top_k_chunks = retrieve_documents(prompt, recall_number, filters)
                 response = get_response(prompt, client, text_chunks)
