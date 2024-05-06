@@ -147,49 +147,80 @@ def prompt_response(prompt_extension: bool, top_k_val: int, prompt: str, client,
 
     return response
     
-def hyperparameter_tuning(pdf_path,models,metrics,chunking,prompt_extensions,top_k,prompts) -> None:
+import csv
+
+def hyperparameter_tuning(pdf_path, models, metrics, chunking, prompt_extensions, top_k, prompts) -> None:
     client = ChatCohere(cohere_api_key=COHERE_API_KEY)
     co = cohere.Client(COHERE_API_KEY)
-    res_list = []
-    for model in models:
-        for metric in metrics:
-            name = f"{model}-{metric}"
-            print(f"Model: {model}, Metric: {metric}")
-            pc = create_pinecone_client(name, model, metric)
-            index = pc.Index(name)
-            print("index created")
-            curr_embedding_dimension = embed2dim[model]
-            for chunk in chunking:
-                chunking_and_uploading(pdf_path, chunk, index, client, curr_embedding_dimension)
-                print("chunking done")
-                for prompt_extension in prompt_extensions:
-                    for k in top_k:
-                        for prompt in prompts:
-                            response = prompt_response(prompt_extension, k, prompt, client, index, co, curr_embedding_dimension)
-                            res_list.append([model, metric, chunk, prompt_extension, k, prompt, response])
-                            print("progress: ", len(res_list))
-                index.delete(deleteAll=True)
-            pc.delete_index(name)
+    
+    # only append to the file
+    with open('snow_dot_hyperparameter_tuning_results.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Model', 'Metric', 'Chunking', 'Prompt Extension', 'Top K', 'Prompt', 'Response'])
+        
+        for model in models:
+            for metric in metrics:
+                name = f"{model}-{metric}"
+                print(f"Model: {model}, Metric: {metric}")
+                pc = create_pinecone_client(name, model, metric)
+                index = pc.Index(name)
+                print("index created")
+                curr_embedding_dimension = embed2dim[model]
+                for chunk in chunking:
+                    chunking_and_uploading(pdf_path, chunk, index, client, curr_embedding_dimension)
+                    print("chunking done")
+                    for prompt_extension in prompt_extensions:
+                        for k in top_k:
+                            for prompt in prompts:
+                                response = prompt_response(prompt_extension, k, prompt, client, index, co, curr_embedding_dimension)
+                                writer.writerow([model, metric, chunk, prompt_extension, k, prompt, response])
+                                print(model, metric, chunk, prompt_extension, k, prompt)
+                    index.delete(deleteAll=True)
+                pc.delete_index(name)
 
-        res_df = pd.DataFrame(res_list, columns=['Model', 'Metric', 'Chunking', 'Prompt Extension', 'Top K', 'Prompt', 'Response'])
-        res_df.to_csv('hyperparameter_tuning_results.csv', index=False)
-
-
-pdf_path = 'src/demo_hw7.pdf'
-# models = ['snowflake-arctic-embed-m', 'all-MiniLM-L6-v2', 'cohere-embed-english-v3.0']
-# metrics = ['cosine', 'euclidean', 'dotproduct']
-# chunking = ['character text splitter', 'recursive character text splitter', 'spacy text splitter']
-models = ['snowflake-arctic-embed-m']
-metrics = ['cosine',"dotproduct"]
-chunking = ['character text splitter', 'recursive character text splitter']
-prompt_extensions = [True, False]
-top_k = [5, 10]
-prompt = ["what should I do for this assignment?",
-          "How transformer works in this assignment?"]
+# pdf_path = 'src/demo_hw7.pdf'
+# # models = ['snowflake-arctic-embed-m', 'all-MiniLM-L6-v2', 'cohere-embed-english-v3.0']
+# # metrics = ['cosine', 'euclidean', 'dotproduct']
+# # chunking = ['character text splitter', 'recursive character text splitter', 'spacy text splitter']
+# models = ['snowflake-arctic-embed-m']
+# metrics = ['cosine',"dotproduct"]
+# chunking = ['character text splitter', 'recursive character text splitter']
+# prompt_extensions = [False,True]
+# top_k = [5, 10]
+# prompt = ["what should I do for this assignment?",
+#           "How transformer works in this assignment?"]
           
-'''
-"What is the purpose of this assignment?",
-          "How grading works for this assignment?",
-          "What is the deadline for this assignment?",
-'''          
-hyperparameter_tuning(pdf_path,models,metrics,chunking,prompt_extensions,top_k,prompt)
+# '''
+# "What is the purpose of this assignment?",
+#           "How grading works for this assignment?",
+#           "What is the deadline for this assignment?",
+# '''          
+# hyperparameter_tuning(pdf_path,models,metrics,chunking,prompt_extensions,top_k,prompt)
+def partial_hyperparameter_tuning(pdf_path, models, metrics, chunking, prompt_extensions, top_k, prompts) -> None:
+    client = ChatCohere(cohere_api_key=COHERE_API_KEY)
+    co = cohere.Client(COHERE_API_KEY)
+    
+    with open('hyperparameter_tuning_results.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        # writer.writerow(['Model', 'Metric', 'Chunking', 'Prompt Extension', 'Top K', 'Prompt', 'Response'])
+        
+        for model in models:
+            for metric in metrics:
+                name = f"{model}-{metric}"
+                print(f"Model: {model}, Metric: {metric}")
+                pc = PineconeClient(api_key = PINECONE_API_KEY)
+                index = pc.Index(name)
+                index.delete(deleteAll=True)
+                print("index connected")
+                curr_embedding_dimension = embed2dim[model]
+                for chunk in chunking:
+                    chunking_and_uploading(pdf_path, chunk, index, client, curr_embedding_dimension)
+                    print("chunking done")
+                    for prompt_extension in prompt_extensions:
+                        for k in top_k:
+                            for prompt in prompts:
+                                response = prompt_response(prompt_extension, k, prompt, client, index, co, curr_embedding_dimension)
+                                writer.writerow([model, metric, chunk, prompt_extension, k, prompt, response])
+                                print(model, metric, chunk, prompt_extension, k, prompt)
+                    index.delete(deleteAll=True)
+                pc.delete_index(name)
