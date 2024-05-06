@@ -22,8 +22,8 @@ from src.functions import *
 # pinecone_api_key = config['PINECONE_API_KEY']
 # openai_api_key = config['OPENAI_API_KEY']
 
-COHERE_API_KEY = "3YF3CLCO7LmwANG6uZu8sO4BZMMM7iluDWaAWf9x"
-PINECONE_API_KEY = "676627d7-7866-4b78-8965-d827551f9fdb"
+COHERE_API_KEY = ""
+PINECONE_API_KEY = ""
 
 #create and config a pinecone client
 def create_pinecone_client(name, model, metrics):
