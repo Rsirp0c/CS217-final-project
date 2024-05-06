@@ -1,6 +1,7 @@
 # CS217-final-project
 
-[project description](https://github.com/Rsirp0c/CS217-final-project/blob/main/src/final-project.pdf)
+## Introduction
+The project is essentially a **RAG**, but I think what set this project apart is that we open several parameters for user to tune with, so it's like a **RAG playground**. The platform is built using `Streamlit, Pinecone, Cohere, Langchain, etc`.
 
 ## How to run the code using virtual environment:
 1. `CD` to the project directory
@@ -24,19 +25,19 @@
 
 ## Steps to use the chat platform
 1. Set up the PineCone Index(Vector Database) by submitting the index creation form on the sidebar.
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot3.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/screenshot3.png">
 2. Upload the pdf file through the file uploader.
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot4.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/screenshot4.png">
 3. Select the desired chunking strategy among character text splitter, recursive character text splitter, and spacy text splitter.
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot5.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/screenshot5.png">
 4. Decide on how much chunks you want to retrieve every time you make a query.
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot6.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/screenshot6.png">
 5. Select the LLM to generate responses 
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot7.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/screenshot7.png">
 6. Switch on some advanced functions based on the provided guideline.
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot8.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/screenshot8.png">
 7. Start chat!
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot9.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/srcscreenshot//screenshot9.png">
 
 ## Group member:
 - Haoran Cheng
@@ -45,6 +46,6 @@
 - Haochen Lin
 
 ## Screenshots:
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot1.png">
-<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/Screenshot2.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/Screenshot1.png">
+<img width="840"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/Screenshot2.png">
 
