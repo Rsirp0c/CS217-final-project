@@ -3,6 +3,12 @@
 ## Introduction
 The project is essentially a **RAG**, but I think what set this project apart is that we open several parameters for user to tune with, so it's like a **RAG playground**. The platform is built using `Streamlit, Pinecone, Cohere, Langchain, etc`.
 
+## What is in our Repo?
+- `app.py`: the main app that launch Streamlit
+- `evaluation_system.py & ragas_evaluation.ipynb`: evaluation script
+- `hyperparameter_tuning_results.csv`: the evaluation result for snowflake's embedding model
+- `src/`: seperated python functions, screenshots, pdf
+
 ## How to run the code using virtual environment:
 1. `CD` to the project directory
 2. Run `python3 -m venv venv` to create a virtual environment
