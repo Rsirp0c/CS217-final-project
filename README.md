@@ -43,7 +43,7 @@ The project is essentially a **RAG**, but I think what set this project apart is
 6. Switch on some advanced functions based on the provided guideline.
 <img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot/screenshot8.png">
 7. Start chat!
-<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/srcscreenshot//screenshot9.png">
+<img width="400"  src="https://github.com/Rsirp0c/CS217-final-project/blob/main/src/screenshot//screenshot9.png">
 
 ## Group member:
 - Haoran Cheng
