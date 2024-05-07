@@ -17,3 +17,4 @@ langchain_experimental
 langchain_text_splitters
 
 ragas
+plotly
