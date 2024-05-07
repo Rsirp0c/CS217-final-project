@@ -49,9 +49,10 @@ with settings:
     values = st.slider(
         "Select a range of values",
         0.0, 1.0, (0.5, 1.0))
-
-'click below to go back 👇'
-st.page_link("app.py", label="Main App", icon="🏠")
+    one,two = st.columns([3,1])
+    with two:
+        'click below to go back 👇'
+        st.page_link("app.py", label="Main App", icon="🏠")
 
 "---"
 
