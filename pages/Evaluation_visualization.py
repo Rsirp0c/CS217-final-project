@@ -46,31 +46,75 @@ with settings:
             ("weighted_score", "cosine_similarity")
         )   
 
+    # User choice for y-axis range
     values = st.slider(
         "Select a range of values",
         0.0, 1.0, (0.5, 1.0))
+    
     one,two = st.columns([3,1])
+    with one:
+        viz = st.radio("Select Visualization", ["Bar Chart", "Line Chart","Area Chart"])
     with two:
+        st.write("")
+        st.write("")
         'click below to go back 👇'
         st.page_link("app.py", label="Main App", icon="🏠")
 
 "---"
 
+table, plot = st.columns([1,1.8])
+
+# df['Combined_Group'] = df[group_feature].apply(lambda x: ' | '.join(x.astype(str)), axis=1)
+# grouped = df.groupby('Combined_Group')[data].mean().reset_index()
+# grouped_sorted = grouped.sort_values(by=data, ascending=False)
+
+# with table:
+#     st.write(grouped_sorted)
+
+# with plot:
+#     if viz == "Bar Chart":
+#         # Creating a bar chart using Plotly
+#         fig = px.bar(df, x= group_feature, y=data,
+#                     title='Bar Chart of Data by Group',
+#                     labels={'Combined_Group': 'Combined Group', data: data},
+#                     color=data)
+#     # Setting y-axis limits
+#     fig.update_layout(yaxis_range=values)  # Adjust these limits as needed for your data
+
+#     # Displaying the plot in Streamlit
+#     st.plotly_chart(fig, use_container_width=True)
+    
 # Combine and group data
 df['Combined_Group'] = df[group_feature].apply(lambda x: ' | '.join(x.astype(str)), axis=1)
 grouped = df.groupby('Combined_Group')[data].mean().reset_index()
 grouped_sorted = grouped.sort_values(by=data, ascending=False)
 
-table, plot = st.columns([1,1.5])
+table, plot = st.columns([1,1.8])
 
 with table:
     st.write(grouped_sorted)
 
 with plot:
-    # Creating a bar chart using Plotly
-    fig = px.bar(grouped_sorted, x='Combined_Group', y=data,
-                title='Bar Chart of Data by Group',
-                labels={'Combined_Group': 'Combined Group', data: data})
+    if viz == "Bar Chart":
+        # Creating a bar chart using Plotly
+        fig = px.bar(grouped_sorted, x='Combined_Group', y=data,
+                    title='Bar Chart of Data by Group',
+                    labels={'Combined_Group': 'Combined Group', data: data},
+                    color=data)
+
+        # Setting y-axis limits
+    elif viz == "Line Chart":
+        # Creating a bar chart using Plotly
+        fig = px.line(grouped_sorted, x='Combined_Group', y=data,
+                    title='Line Chart of Data by Group',
+                    labels={'Combined_Group': 'Combined Group', data: data},
+                    markers=True)
+    elif viz == "Area Chart":
+        # Creating a bar chart using Plotly
+        fig = px.area(grouped_sorted, x='Combined_Group', y=data,
+                    title='Area Chart of Data by Group',
+                    labels={'Combined_Group': 'Combined Group', data: data},
+                    markers=True)
 
     # Setting y-axis limits
     fig.update_layout(yaxis_range=values)  # Adjust these limits as needed for your data
